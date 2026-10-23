@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASL-2 Assessment Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+        }
+        .report-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .metric-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 1.2em;
+            color: #3498db;
+        }
+        .progress-chart {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .recommendations {
+            background-color: #e8f4fd;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            margin-top: 20px;
+        }
+        .recommendation-item {
+            margin-bottom: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .report-section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <h1>CASL-2 Assessment Report</h1>
+        <h2>Student ID: {{ student_id }}</h2>
+        <p>Report Generated: {{ report_date }}</p>
+    </div>
+
+    <div class="report-section">
+        <h2>Assessment Summary</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Total Sessions</div>
+                <div class="metric-value">{{ session_count }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Latest Session Date</div>
+                <div class="metric-value">{{ latest_session.date }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Student Turns</div>
+                <div class="metric-value">{{ latest_session.student_turns }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Words</div>
+                <div class="metric-value">{{ latest_session.total_words }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Words Per Turn</div>
+                <div class="metric-value">{{ "%.1f"|format(latest_session.average_words_per_turn) }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Session Duration</div>
+                <div class="metric-value">{{ latest_session.duration_minutes }} minutes</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <h2>CASL-2 Domain Assessment</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Lexical/Semantic Skills</div>
+                <div class="metric-value">{{ latest_session.casl_metrics.lexical_semantic }}</div>
+                <div>
+                    {% if progress.lexical_semantic > 0 %}
+                        <span style="color: green;">↑ {{ "%.1f"|format(progress.lexical_semantic * 100) }}% improvement</span>
+                    {% elif progress.lexical_semantic < 0 %}
+                        <span style="color: red;">↓ {{ "%.1f"|format(progress.lexical_semantic * -100) }}% decrease</span>
+                    {% else %}
+                        <span style="color: orange;">→ No change</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Syntactic Skills</div>
+                <div class="metric-value">{{ latest_session.casl_metrics.syntactic }}</div>
+                <div>
+                    {% if progress.syntactic > 0 %}
+                        <span style="color: green;">↑ {{ "%.1f"|format(progress.syntactic * 100) }}% improvement</span>
+                    {% elif progress.syntactic < 0 %}
+                        <span style="color: red;">↓ {{ "%.1f"|format(progress.syntactic * -100) }}% decrease</span>
+                    {% else %}
+                        <span style="color: orange;">→ No change</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Supralinguistic Skills</div>
+                <div class="metric-value">{{ latest_session.casl_metrics.supralinguistic }}</div>
+                <div>
+                    {% if progress.supralinguistic > 0 %}
+                        <span style="color: green;">↑ {{ "%.1f"|format(progress.supralinguistic * 100) }}% improvement</span>
+                    {% elif progress.supralinguistic < 0 %}
+                        <span style="color: red;">↓ {{ "%.1f"|format(progress.supralinguistic * -100) }}% decrease</span>
+                    {% else %}
+                        <span style="color: orange;">→ No change</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Pragmatic Skills</div>
+                <div class="metric-value">{{ latest_session.casl_metrics.pragmatic }}</div>
+                <div>
+                    {% if progress.pragmatic > 0 %}
+                        <span style="color: green;">↑ {{ "%.1f"|format(progress.pragmatic * 100) }}% improvement</span>
+                    {% elif progress.pragmatic < 0 %}
+                        <span style="color: red;">↓ {{ "%.1f"|format(progress.pragmatic * -100) }}% decrease</span>
+                    {% else %}
+                        <span style="color: orange;">→ No change</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-section">
+        <h2>Progress Chart</h2>
+        <div class="progress-chart">
+            <img src="{{ chart_path }}" alt="Progress Chart" style="max-width: 100%;">
+        </div>
+    </div>
+
+    <div class="report-section">
+        <h2>Recommendations</h2>
+        <div class="recommendations">
+            {% for recommendation in recommendations %}
+                <div class="recommendation-item">• {{ recommendation }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Generated by CASL Voice Bot Speech Therapy Assessment Tool</p>
+        <p>© {{ report_date.split('/')[-1] }} Speech Therapy Assessment System</p>
+    </div>
+</body>
+</html>
